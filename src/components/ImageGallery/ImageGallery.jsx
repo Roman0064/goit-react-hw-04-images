@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { getImages } from "services/getImages";
 import {ImageGalleryItem} from '../ImageGalleryItem/ImageGalleryItem'
@@ -14,81 +14,54 @@ const Status = {
   REJECTED: 'rejected',
 };
 
-export default class ImageGallery extends Component{
+const ImageGallery = () => {
 
-  static propTypes = {
-    textSearch: PropTypes.string.isRequired,
-  };
+  const [ images, setImages ] = useState([]);
+  const [ page, setPage ] = useState(1);
+  const [ totalPages, setTotalPages ] = useState(0);
+  const [ status, setStatus ] = useState(Status.IDLE);
+  const [ textSearch, setTextSearch ] = useState('');
+  const [ modal, setModal ] = useState({});
+  const [ modalShow, setModalShow ] = useState(false);
+  const [ isLoading, setIsLoading ] = useState(false);
 
-
-  state = {
-    images: [],
-    page: 1,
-    totalPages: 0,
-    status: Status.IDLE,
-    textSearch: '',
-    modal: {},
-    modalShow: false,
-    isLoading: false,
-  };
-
-  componentDidUpdate(prevProps, prevState){
-    const {textSearch} = this.props;
-
-    if (prevProps.textSearch !== textSearch) {
-      this.setState({ page: 1, images: [], status: Status.PENDING, textSearch }, () => {
-        this.loadImages();
-      });
-    };
-
-
-  }
-
-  loadImages(){
-    const { textSearch, page } = this.state;
-    
-      this.setState({isLoading: true});
+  const loadImages = () =>{
+      setIsLoading(true);
       getImages(textSearch, page)
       .then((res) => res.json())
       .then((data) => {
         if (data.hits.length === 0) {
-          this.setState({ status: Status.RESOLVED });
+          setStatus(Status.RESOLVED);
           alert("No images found!");
         } else {
-          this.setState((prevState) => ({
-            images: [...prevState.images, ...data.hits],
-            totalPages: Math.ceil(data.totalHits / 12),
-            status: Status.RESOLVED,
-          }));
+            setImages((prevState) => [...prevState, ...data.hits]);
+            setTotalPages(Math.ceil(data.totalHits / 12));
+            setStatus(Status.RESOLVED);
+          };
         }
-      })
+      )
       .catch(() => {
-        this.setState({status: Status.REJECTED});
+        setStatus(Status.REJECTED);
       })
       .finally(() => {
-        this.setState({isLoading: false});
+        setIsLoading(false);
       })
   };
 
-  handleLoadMore = () => {
-    this.setState((prevState) => ({ page: prevState.page + 1 }), () => {
-      this.loadImages();
+  const handleLoadMore = () => {
+    setPage((prevState) => prevState + 1 , () => {
+      loadImages();
     });
   };
 
-  handleImageClick = (image) => {
-    this.toggleModal();
-    this.setState({modal : image.largeImageURL});
+  const handleImageClick = (image) => {
+    toggleModal();
+    setModal(image.largeImageURL);
   };
 
-  toggleModal= () =>{
-    this.setState(({ modalShow }) => ({
-        modalShow: !modalShow,
-    }));
+  const toggleModal= () =>{
+    setModalShow((modalShow) => !modalShow);
   };
-  
-  render() {
-    const { images, status, page, totalPages, modalShow, modal, isLoading } = this.state;
 
       if(status === 'pending') {
         return <Loader />  ;
@@ -102,12 +75,13 @@ export default class ImageGallery extends Component{
         return <div className={css.wrapper}>
             <ul className={css.ul_item}>
               {images.map((image) => (
-              <ImageGalleryItem key={image.id} item={image} onClick={this.handleImageClick}/>
+              <ImageGalleryItem key={image.id} item={image} onClick={handleImageClick}/>
               ))}
             </ul>
-            {isLoading ? ( <Loader/>) : (page < totalPages && <Button onClick={this.handleLoadMore}/> )}
-            {modalShow && <Modal item={modal} onClose={this.toggleModal}/>}
+            {isLoading ? ( <Loader/>) : (page < totalPages && <Button onClick={handleLoadMore}/> )}
+            {modalShow && <Modal item={modal} onClose={toggleModal}/>}
           </div>;
       };
-  };
 };
+
+export default ImageGallery;
