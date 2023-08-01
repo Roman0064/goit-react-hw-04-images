@@ -1,9 +1,9 @@
-import React, { useState } from "react";
-import PropTypes from "prop-types";
-import { getImages } from "services/getImages";
-import {ImageGalleryItem} from '../ImageGalleryItem/ImageGalleryItem'
-import {Button} from '../Button/Button'
-import { Loader } from "components/Loader/Loader";
+import React, { useEffect, useState } from "react";
+// import PropTypes from "prop-types";
+import getImages from "services/getImages";
+import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem'
+import Button from '../Button/Button'
+import Loader from "components/Loader/Loader";
 import Modal from "components/Modal/Modal";
 import css from './ImageGallery.module.css'
 
@@ -14,18 +14,27 @@ const Status = {
   REJECTED: 'rejected',
 };
 
-const ImageGallery = () => {
+const ImageGallery = ({textSearch}) => {
 
-  const [ images, setImages ] = useState([]);
-  const [ page, setPage ] = useState(1);
-  const [ totalPages, setTotalPages ] = useState(0);
-  const [ status, setStatus ] = useState(Status.IDLE);
-  const [ textSearch, setTextSearch ] = useState('');
-  const [ modal, setModal ] = useState({});
-  const [ modalShow, setModalShow ] = useState(false);
-  const [ isLoading, setIsLoading ] = useState(false);
+  const [ images, setImages ] = useState ([]);
+  const [ page, setPage ] = useState (1);
+  const [ totalPages, setTotalPages ] = useState (0);
+  const [ status, setStatus ] = useState (Status.IDLE);
+  const [ modal, setModal ] = useState ({});
+  const [ modalShow, setModalShow ] = useState (false);
+  const [ isLoading, setIsLoading ] = useState (false);
 
-  const loadImages = () =>{
+  useEffect(()=> {
+    if(textSearch){
+      setPage(1);
+      setImages([]);
+      setStatus(Status.PENDING);
+      loadImages()
+    }
+  }, [textSearch]);
+
+  const loadImages = () => {
+
       setIsLoading(true);
       getImages(textSearch, page)
       .then((res) => res.json())
@@ -34,12 +43,11 @@ const ImageGallery = () => {
           setStatus(Status.RESOLVED);
           alert("No images found!");
         } else {
-            setImages((prevState) => [...prevState, ...data.hits]);
+          setImages( prevState => [...prevState, ...data.hits] );
             setTotalPages(Math.ceil(data.totalHits / 12));
             setStatus(Status.RESOLVED);
           };
-        }
-      )
+      })
       .catch(() => {
         setStatus(Status.REJECTED);
       })
@@ -49,9 +57,8 @@ const ImageGallery = () => {
   };
 
   const handleLoadMore = () => {
-    setPage((prevState) => prevState + 1 , () => {
-      loadImages();
-    });
+    setPage( prevState => prevState + 1, () => {
+      loadImages()});
   };
 
   const handleImageClick = (image) => {
@@ -60,28 +67,27 @@ const ImageGallery = () => {
   };
 
   const toggleModal= () =>{
-    setModalShow((modalShow) => !modalShow);
+    setModalShow( modalShow => !modalShow);
   };
 
-      if(status === 'pending') {
-        return <Loader />  ;
-      };
+    if(status === 'pending') {
+      return <Loader />  ;
+    };
 
-      if(status === 'rejected') {
-        return <h2>Sorry, something went wrong. Please try again later.</h2>;
-      }
+    if(status === 'rejected') {
+      return <h2>Sorry, something went wrong. Please try again later.</h2>;
+    }
 
-      if(status === 'resolved') {
-        return <div className={css.wrapper}>
-            <ul className={css.ul_item}>
-              {images.map((image) => (
-              <ImageGalleryItem key={image.id} item={image} onClick={handleImageClick}/>
-              ))}
-            </ul>
-            {isLoading ? ( <Loader/>) : (page < totalPages && <Button onClick={handleLoadMore}/> )}
-            {modalShow && <Modal item={modal} onClose={toggleModal}/>}
-          </div>;
-      };
+    if(status === 'resolved') {
+      return <div className={css.wrapper}>
+          <ul className={css.ul_item}>
+            {images.map((image) => (
+            <ImageGalleryItem key={image.id} item={image} onClick={handleImageClick}/>
+            ))}
+          </ul>
+          {isLoading ? ( <Loader/>) : (page < totalPages && <Button onClick={handleLoadMore}/> )}
+          {modalShow && <Modal item={modal} onClose={toggleModal}/>}
+        </div>;
+    };
 };
-
 export default ImageGallery;
