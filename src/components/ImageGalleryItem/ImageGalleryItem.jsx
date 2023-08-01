@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import css from './ImageGalleryItem.module.css'
 
-export const ImageGalleryItem = ({ item, onClick }) => {
+const ImageGalleryItem = ({ item, onClick }) => {
     const { webformatURL, tags, } = item;
 
     return (
@@ -18,3 +18,4 @@ ImageGalleryItem.propTypes = {
       tags: PropTypes.string.isRequired,
     }).isRequired,
 };
+export default ImageGalleryItem;
