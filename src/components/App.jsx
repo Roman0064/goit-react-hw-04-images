@@ -1,25 +1,23 @@
-import { Component } from "react";
+import { useState } from "react";
 import PropTypes from "prop-types";
 import Searchbar from "./Searchbar/Searchbar";
 import ImageGallery from './ImageGallery/ImageGallery'
 
-class App extends Component {
-  state = {
-    textSearch: '',
+const App = () => {
+
+  const [textSearch, setTextSearch ] = useState('');
+
+
+  const handleFormSubmit = textSearch => {
+    setTextSearch(textSearch);
   };
 
-  handleFormSubmit = textSearch => {
-    this.setState({ textSearch });
-  };
-
-  render() {
-    return(
-      <div>
-        <Searchbar onSubmit={this.handleFormSubmit}/>
-        <ImageGallery textSearch={this.state.textSearch}/>
-      </div>
-    )
-  };
+  return(
+    <div>
+      <Searchbar onSubmit={handleFormSubmit}/>
+      <ImageGallery textSearch={textSearch}/>
+    </div>
+  )
 };
 
 App.propTypes = {
