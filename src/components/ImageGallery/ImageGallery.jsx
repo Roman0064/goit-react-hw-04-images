@@ -14,54 +14,50 @@ const Status = {
   REJECTED: 'rejected',
 };
 
-const ImageGallery = ({ textSearch, page, setPage }) => {
+const ImageGallery = ({ textSearch }) => {
   const [images, setImages] = useState([]);
   const [totalPages, setTotalPages] = useState(0);
   const [status, setStatus] = useState(Status.IDLE);
   const [modal, setModal] = useState({});
   const [modalShow, setModalShow] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
-    const loadImages = () => {
-      setIsLoading(true);
-      getImages(textSearch, page)
-        .then(res => res.json())
-        .then(data => {
-          if (data.hits.length === 0) {
-            setStatus(Status.RESOLVED);
-            alert('No images found!');
-          } else {
-            setImages(prevState =>
-              page === 1 ? data.hits : [...prevState, ...data.hits]
-            );
-            setTotalPages(Math.ceil(data.totalHits / 12));
-            setStatus(Status.RESOLVED);
-          }
-        })
-        .catch(() => {
-          setStatus(Status.REJECTED);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
+    if(textSearch === ''){
+      return
     };
+    setPage(1);
+    setImages([]);
+    loadImages();
+  },[ textSearch ]);
 
-    if (textSearch) {
-      if (page === 1) {
-        setImages([]);
-      }
-
-      setStatus(Status.PENDING);
-      loadImages();
-      return;
-    }
-  }, [textSearch, page]);
+  const loadImages = () => {
+    setIsLoading(true);
+    getImages(textSearch, page)
+      .then(res => res.json())
+      .then(data => {
+        if (data.hits.length === 0) {
+          setStatus(Status.RESOLVED);
+          alert('No images found!');
+        } else {
+          setImages(prevState => [...prevState, ...data.hits]
+          );
+          setTotalPages(Math.ceil(data.totalHits / 12));
+          setStatus(Status.RESOLVED);
+        }
+      })
+      .catch(() => {
+        setStatus(Status.REJECTED);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
 
   const handleLoadMore = () => {
-    setPage(
-      prevState => prevState + 1
-    );
+    setPage( prevState => prevState + 1 );
+    loadImages();
   };
 
   const handleImageClick = image => {

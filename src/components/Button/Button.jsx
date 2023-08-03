@@ -4,11 +4,11 @@ import css from './Button.module.css'
 
 const Button = ({ onClick}) => {
     return (
-      <button onClick={onClick} className={css.button}>Load More</button>
+      <button onClick={onClick} className={css.button} type="button">Load More</button>
     );
 };
+export default Button;
 
 Button.propTypes = {
   onClick: PropTypes.func.isRequired,
 };
-export default Button;

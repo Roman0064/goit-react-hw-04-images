@@ -11,6 +11,7 @@ const ImageGalleryItem = ({ item, onClick }) => {
         </li>
     );
 };
+export default ImageGalleryItem;
 
 ImageGalleryItem.propTypes = {
     item: PropTypes.shape({
@@ -18,4 +19,3 @@ ImageGalleryItem.propTypes = {
       tags: PropTypes.string.isRequired,
     }).isRequired,
 };
-export default ImageGalleryItem;
