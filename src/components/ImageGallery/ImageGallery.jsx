@@ -30,6 +30,7 @@ const ImageGallery = ({ textSearch }) => {
     setPage(1);
     setImages([]);
     loadImages();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   },[ textSearch ]);
 
   const loadImages = () => {
@@ -102,8 +103,6 @@ const ImageGallery = ({ textSearch }) => {
 
 ImageGallery.propTypes = {
   textSearch: PropTypes.string,
-  page: PropTypes.number,
-  setPage: PropTypes.func,
 };
 
 export default ImageGallery;
