@@ -47,9 +47,15 @@ const ImageGallery = ({ textSearch, page, setPage }) => {
     };
 
     if (textSearch) {
+      
+      if (page === 1) {
+        setImages([]);
+        setStatus(Status.PENDING);
+      };
       loadImages();
       return;
-    };
+    }
+
   }, [textSearch, page]);
 
   const handleLoadMore = () => {
